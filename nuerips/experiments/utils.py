@@ -130,7 +130,7 @@ def featurize(batch, device, shuffle_fraction=0.):
         indices = np.asarray([alphabet.index(a) for a in b['seq']], dtype=np.int32)
 
         # Store raw sequences for passing to the model
-        raw_sequences.append(b['seq'])
+        raw_sequences.append([b['seq'],b['conserved']])
 
         if shuffle_fraction > 0.:
             idx_shuffle = shuffle_subset(l, shuffle_fraction)

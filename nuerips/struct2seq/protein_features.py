@@ -59,7 +59,7 @@ class ProteinFeatures(nn.Module):
         self.features_type = features_type
         self.feature_dimensions = {
             'coarse': (3, num_positional_embeddings + num_rbf + 7),
-            'full': (6, num_positional_embeddings + num_rbf + 7 + 1),
+            'full': (6, num_positional_embeddings + num_rbf + 7 + 3),
             'dist': (6, num_positional_embeddings + num_rbf),
             'hbonds': (3, 2 * num_positional_embeddings),
         }
@@ -75,10 +75,31 @@ class ProteinFeatures(nn.Module):
         self.norm_nodes = Normalize(node_features)
         self.norm_edges = Normalize(edge_features)
 
+    def _solubility_interactions(self, sequences, E_idx, mask):
+        # Solubility map: hydrophobic -1, hydrophilic 1, neutral 0
+        solubility_map = {
+            'L': -1, 'I': -1, 'M': -1, 'P': -1, 'V': -1, 'A': -1, 'G': -1, 'F': -1, 'W': -1, # Hydrophobic
+            'R': 1, 'K': 1, 'D': 1, 'E': 1, 'N': 1, 'Q': 1,  # Hydrophilic
+            'C': 1, 'H': 1, 'T': 1, 'S': 1, 'Y': 0  # Neutral
+        }
+        # Map sequence to solubility
+        solubility = torch.zeros_like(mask, dtype=torch.float32)
+        for i, seq in enumerate(sequences[0]):
+            for j, aa in enumerate(seq):
+                solubility[i, j] = solubility_map.get(aa, 0)
+
+        # Gather solubility based on edges
+        solubility_i = gather_nodes(solubility.unsqueeze(-1), E_idx)
+        solubility_j = gather_nodes(solubility.unsqueeze(-1), E_idx)
+
+        # Calculate solubility interactions
+        solubility_interactions = torch.sign(solubility_i * solubility_j)  # 1 for like solubility, -1 for opposite
+        return solubility_interactions.squeeze(-1)
+
     def _charge_interactions(self, sequences, E_idx, mask):
         # Map sequence to charges
         charges = torch.zeros_like(mask, dtype=torch.float32)
-        for i, seq in enumerate(sequences):
+        for i, seq in enumerate(sequences[0]):
             for j, aa in enumerate(seq):
                 charges[i, j] = self.charge_map.get(aa, 0)
 
@@ -89,6 +110,21 @@ class ProteinFeatures(nn.Module):
         # Calculate charge interactions
         charge_interactions = torch.sign(charges_i * charges_j) * (-1)  # -1 for like charges, +1 for opposite
         return charge_interactions.squeeze(-1)
+    
+    def _conserved_interactions(self, sequences, E_idx, mask):
+        mapping = {"0": 0, "1": 1,}
+        conserved = torch.zeros_like(mask, dtype=torch.float32)
+        for i, seq in enumerate(sequences[1]):
+            for j, val in enumerate(seq):
+                conserved[i, j] = mapping.get(val, 0)
+
+        # Gather solubility based on edges
+        conserved_i = gather_nodes(conserved.unsqueeze(-1), E_idx)
+        conserved_j = gather_nodes(conserved.unsqueeze(-1), E_idx)
+
+        # Calculate solubility interactions
+        conserved_interactions = torch.sign(conserved_i * conserved_j) 
+        return conserved_interactions.squeeze(-1)
 
     def _dist(self, X, mask, eps=1E-6):
         """ Pairwise euclidean distances """
@@ -374,6 +410,8 @@ class ProteinFeatures(nn.Module):
 
         # Compute charge interactions
         charge_interactions = self._charge_interactions(sequences, E_idx, mask)
+        solubility_interactions = self._solubility_interactions(sequences, E_idx, mask)
+        conserved_interactions = self._conserved_interactions(sequences, E_idx, mask)
 
         if self.features_type == 'coarse':
             # Coarse backbone features
@@ -394,7 +432,10 @@ class ProteinFeatures(nn.Module):
         elif self.features_type == 'full': #DEFAULT
             # Full backbone angles
             V = self._dihedrals(X)
-            E = torch.cat((E_positional, RBF, O_features, charge_interactions.unsqueeze(-1)), -1)
+            E = torch.cat((E_positional, RBF, O_features, 
+                           charge_interactions.unsqueeze(-1),
+                           solubility_interactions.unsqueeze(-1),
+                           conserved_interactions.unsqueeze(-1),), -1)
             # E = torch.cat((E_positional, RBF, O_features), -1)
         elif self.features_type == 'dist':
             # Full backbone angles

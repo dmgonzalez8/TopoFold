@@ -22,6 +22,7 @@ class StructureDataset():
                 entry = json.loads(line)
                 seq = entry['seq']
                 name = entry['name']
+                conservation = entry['conserved']    
 
                 # Convert raw coords to np arrays
                 for key, val in entry['coords'].items():
