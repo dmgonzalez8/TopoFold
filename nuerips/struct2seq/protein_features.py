@@ -59,7 +59,7 @@ class ProteinFeatures(nn.Module):
         self.features_type = features_type
         self.feature_dimensions = {
             'coarse': (3, num_positional_embeddings + num_rbf + 7),
-            'full': (6, num_positional_embeddings + num_rbf + 7 + 3),
+            'full': (6, num_positional_embeddings + num_rbf + 7 + 2),
             'dist': (6, num_positional_embeddings + num_rbf),
             'hbonds': (3, 2 * num_positional_embeddings),
         }
@@ -411,7 +411,7 @@ class ProteinFeatures(nn.Module):
         # Compute charge interactions
         charge_interactions = self._charge_interactions(sequences, E_idx, mask)
         solubility_interactions = self._solubility_interactions(sequences, E_idx, mask)
-        conserved_interactions = self._conserved_interactions(sequences, E_idx, mask)
+        # conserved_interactions = self._conserved_interactions(sequences, E_idx, mask)
 
         if self.features_type == 'coarse':
             # Coarse backbone features
