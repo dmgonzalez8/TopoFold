@@ -434,8 +434,8 @@ class ProteinFeatures(nn.Module):
             V = self._dihedrals(X)
             E = torch.cat((E_positional, RBF, O_features, 
                            charge_interactions.unsqueeze(-1),
-                           solubility_interactions.unsqueeze(-1),
-                           conserved_interactions.unsqueeze(-1),), -1)
+                        #    conserved_interactions.unsqueeze(-1),
+                           solubility_interactions.unsqueeze(-1),), -1)
             # E = torch.cat((E_positional, RBF, O_features), -1)
         elif self.features_type == 'dist':
             # Full backbone angles
