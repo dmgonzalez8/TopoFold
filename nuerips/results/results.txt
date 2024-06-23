@@ -1,0 +1,5 @@
+Best epoch: 94
+Perplexities:
+	Train: 5.071277071889465
+	Validation: 5.339337147805649
+	Test: 5.305304516256993

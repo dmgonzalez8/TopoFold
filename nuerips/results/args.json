@@ -1,0 +1,1 @@
+{"hidden": 128, "k_neighbors": 30, "vocab_size": 20, "features": "full", "model_type": "structure", "mpnn": true, "restore": "", "name": "", "file_data": "../data/cath/chain_set.jsonl", "file_splits": "../data/cath/chain_set_splits.json", "batch_tokens": 2500, "epochs": 100, "seed": 1111, "cuda": true, "augment": false, "shuffle": 0.0, "dropout": 0.1, "smoothing": 0.1}
