@@ -1,5 +1,5 @@
 ## Generative Models for Protein Sequences
-
+![header pic](./images/header.png)
 #### [Eren Bardak](https://github.com/eren-bardak) and Daniel Gonzalez
 #### University of San Francisco
 
