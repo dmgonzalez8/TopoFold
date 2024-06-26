@@ -37,3 +37,6 @@ The project includes utilities to export processed data into JSONL format suitab
 
 ### Conclusion
 Our project demonstrates effective generation of MSAs with structures similar to known proteins. Future improvements could include metrics to quantify the closeness of predicted and native protein structures.
+
+### Citation
+Struct2Seq is based on [Ingraham et al (2019)](https://papers.nips.cc/paper_files/paper/2019/file/f3a4ff4839c56a5f460c88cce3666a2b-Paper.pdf).
