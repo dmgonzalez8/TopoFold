@@ -6,6 +6,8 @@
 ### Overview
 In this project, we explore two cutting-edge methods for generating novel protein sequences. We extend and refine the Struct2Seq model, which incorporates Transformers and a Message Passing Neural Network (MPNN) for predicting novel Multiple Sequence Alignments (MSA) from given protein sequences. Additionally, we improve upon ProtGPT2, aimed at generating entirely novel protein sequences.
 
+You can watch our introduction video [here](https://drive.google.com/file/d/1ktdDKZdzmEtQg8w9GPtg8lbSpItoyM12/view?usp=sharing).
+
 ### Documentation
 See the notebook [`Presentation.ipynb`](/Presentation.ipynb) for complete documentation. In order to view the 3D structure visualizations, you will need to install the project dependencies and then run the corresponding cells in the notebook.
 
